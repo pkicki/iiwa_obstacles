@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Arguments -->
+    <arg name="world_name" default="$(find iiwa_obstacles_gazebo)/worlds/iiwa_obstacles.world"/>
+    <arg name="gui" default="false"/>
+    <arg name="paused" default="false"/>
+    <arg name="physics" default="ode" />
+
+    <arg name="hardware_interface" default="hardware_interface/EffortJointInterface"/>
+    <arg name="dynamics_parameter" default="epfl"/>
+
+<!--    <arg name="controllers" default="bspline_joint_trajectory_controller"/> -->
+   <arg name="controllers" default="bspline_ff_kino_joint_trajectory_controller"/>
+
+    <arg name="control_config" default="$(find iiwa_obstacles_gazebo)/config/epfl_dynamics_control.yaml"/>
+
+    <arg name="iiwa_urdf" default="$(find iiwa_obstacles_gazebo)/urdf/iiwa.urdf.xacro"/>
+
+    <arg name="iiwa_xyz" default="0.0 0.0 0.0"/>
+    <arg name="iiwa_rpy" default="0 0 0"/>
+
+    <!-- Simulation -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="physics" value="$(arg physics)" />
+    </include>
+
+    <!-- Controllers -->
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(arg control_config)" command="load"/>
+
+    <!-- load the controllers -->
+<!--     <group ns="XD"> -->
+        <param name="robot_description" command="$(find xacro)/xacro '$(arg iiwa_urdf)' robot_name:='F'
+        hardware_interface:='$(arg hardware_interface)' base_xyz:='$(arg iiwa_xyz)' base_rpy:='$(arg iiwa_rpy)'
+        dynamics_parameter:='$(arg dynamics_parameter)'"/>
+
+        <node name="spawner" pkg="controller_manager" type="controller_manager" output="screen"
+            args="spawn joint_state_controller $(arg controllers)"/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <param name="publish_frequency" type="double" value="50.0"/>
+        </node>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"
+              output="screen"/>
+<!--     </group> -->
+
+
+    <node name="iiwa_model_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -model iiwa -param robot_description"/>
+
+</launch>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="controllers" default="bspline_ff_kino_joint_trajectory_controller"/>
+
+    <rosparam file="$(find iiwa_obstacles_neural_planner)/config/config.yaml" command="load" subst_value="true"/>
+
+<!--     <node pkg="iiwa_obstacles_neural_planner" type="neural_bspline_planner_node.py" name="neural_bspline_planner_node" output="screen"> -->
+<!--         <param name="controllers" value="$(arg controllers)" /> -->
+<!--     </node> -->
+
+</launch>

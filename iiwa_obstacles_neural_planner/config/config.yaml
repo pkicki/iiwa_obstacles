@@ -1,0 +1,3 @@
+neural_planner:
+  #planner_path: "./trained_models/last_n-11"
+  planner_path: "./trained_models/fairlysimple3/last_n-247"
