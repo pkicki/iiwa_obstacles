@@ -10,6 +10,20 @@ from manifold_planning.utils.constants import Limits
 from manifold_planning.utils.constants import Robot
 
 
+class TimeOptimizationObjective(ob.PathLengthOptimizationObjective):
+    def __init__(self, si):
+        super(TimeOptimizationObjective, self).__init__(si)
+        self.si_ = si
+
+    #def motionCost(self, PathLengthOptimizationObjective, *args, **kwargs):
+    def motionCost(self, s1, s2):
+        expected_time = 0.
+        for i in range(self.si_.getStateSpace().getDimension()):
+            #expected_time_i = abs(s1[i] - s2[i]) / Limits.q_dot7[i]
+            #expected_time = max(expected_time, expected_time_i)
+            expected_time = max(expected_time, abs(s1[i] - s2[i]) / Limits.q_dot7[i])
+        return expected_time
+
 class OMPLPlanner:
     def __init__(self, planner, n_pts, pino_model):
         self.N = n_pts
@@ -19,8 +33,8 @@ class OMPLPlanner:
         self.pino_data = self.pino_model.createData()
 
         #self.time = 60.
-        #self.time = 1.0
-        self.time = 10.0
+        self.time = 1.0
+        #self.time = 10.0
 
         rvss = ob.RealVectorStateSpace(self.D)
         bounds = ob.RealVectorBounds(self.D)
@@ -85,6 +99,7 @@ class OMPLPlanner:
             goal[i] = qk[i]
         self.ss.setStartAndGoalStates(start, goal, 0.01)
         self.ss.setStateValidityChecker(ob.StateValidityCheckerFn(lambda x: self.obstacles(x, obstacles)))
+        self.ss.setOptimizationObjective(TimeOptimizationObjective(self.si))
         self.ss.getOptimizationObjective().setCostThreshold(1000.)
         self.ss.setup()
         stat = self.ss.solve(self.time)
