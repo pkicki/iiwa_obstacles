@@ -24,6 +24,11 @@ class TimeOptimizationObjective(ob.PathLengthOptimizationObjective):
             expected_time = max(expected_time, abs(s1[i] - s2[i]) / Limits.q_dot7[i])
         return expected_time
 
+    def motionCostHeuristic(self, s1, s2):
+        return self.motionCost(s1, s2)
+
+
+
 class OMPLPlanner:
     def __init__(self, planner, n_pts, pino_model):
         self.N = n_pts
